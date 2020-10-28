@@ -1,11 +1,14 @@
 ﻿using System;
 using AuthenticationServices;
 using Foundation;
+using SignInWithApple.Sample.iOS.Utils;
 using UIKit;
 
-namespace SignInWithApple.Sample.iOS
+namespace SignInWithApple.Sample.iOS.ViewControllers
 {
-    public partial class LoginViewController : UIViewController, IASAuthorizationControllerDelegate, IASAuthorizationControllerPresentationContextProviding
+    public partial class LoginViewController : UIViewController,
+        IASAuthorizationControllerDelegate,
+        IASAuthorizationControllerPresentationContextProviding
     {
         public LoginViewController(IntPtr handle) : base(handle)
         {
@@ -14,9 +17,8 @@ namespace SignInWithApple.Sample.iOS
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-            // Perform any additional setup after loading the view, typically from a nib.
 
-            SetupProviderLoginView();
+            InitProviderLoginView();
         }
 
         public override void ViewDidAppear(bool animated)
@@ -26,20 +28,22 @@ namespace SignInWithApple.Sample.iOS
             PerformExistingAccountSetupFlows();
         }
 
-        void SetupProviderLoginView()
+        private void InitProviderLoginView()
         {
-            var authorizationButton = new ASAuthorizationAppleIdButton(ASAuthorizationAppleIdButtonType.Default, ASAuthorizationAppleIdButtonStyle.White);
+            var authorizationButton = new ASAuthorizationAppleIdButton(
+                ASAuthorizationAppleIdButtonType.Default,
+                ASAuthorizationAppleIdButtonStyle.White);
             authorizationButton.TouchUpInside += HandleAuthorizationAppleIDButtonPress;
             loginProviderStackView.AddArrangedSubview(authorizationButton);
         }
 
         // Prompts the user if an existing iCloud Keychain credential or Apple ID credential is found.
-        void PerformExistingAccountSetupFlows()
+        private void PerformExistingAccountSetupFlows()
         {
             // Prepare requests for both Apple ID and password providers.
             ASAuthorizationRequest[] requests = {
-                new ASAuthorizationAppleIdProvider ().CreateRequest (),
-                new ASAuthorizationPasswordProvider ().CreateRequest ()
+                new ASAuthorizationAppleIdProvider().CreateRequest(),
+                new ASAuthorizationPasswordProvider().CreateRequest()
             };
 
             // Create an authorization controller with the given requests.
@@ -53,7 +57,11 @@ namespace SignInWithApple.Sample.iOS
         {
             var appleIdProvider = new ASAuthorizationAppleIdProvider();
             var request = appleIdProvider.CreateRequest();
-            request.RequestedScopes = new[] { ASAuthorizationScope.Email, ASAuthorizationScope.FullName };
+            request.RequestedScopes = new[]
+            {
+                ASAuthorizationScope.Email,
+                ASAuthorizationScope.FullName
+            };
 
             var authorizationController = new ASAuthorizationController(new[] { request });
             authorizationController.Delegate = this;
@@ -85,7 +93,9 @@ namespace SignInWithApple.Sample.iOS
 
                 // For the purpose of this demo app, show the Apple ID credential information in the ResultViewController.
                 if (!(PresentingViewController is ResultViewController viewController))
+                {
                     return;
+                }
 
                 InvokeOnMainThread(() =>
                 {

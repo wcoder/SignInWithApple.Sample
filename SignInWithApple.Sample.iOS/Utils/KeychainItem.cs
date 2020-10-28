@@ -2,7 +2,7 @@
 using Foundation;
 using Security;
 
-namespace SignInWithApple.Sample.iOS
+namespace SignInWithApple.Sample.iOS.Utils
 {
     public class KeychainItem
     {

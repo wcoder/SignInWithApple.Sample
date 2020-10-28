@@ -7,7 +7,7 @@
 using Foundation;
 using System.CodeDom.Compiler;
 
-namespace SignInWithApple.Sample.iOS
+namespace SignInWithApple.Sample.iOS.ViewControllers
 {
     [Register("ResultViewController")]
     partial class ResultViewController

@@ -1,8 +1,9 @@
 ﻿using System;
 using Foundation;
+using SignInWithApple.Sample.iOS.Utils;
 using UIKit;
 
-namespace SignInWithApple.Sample.iOS
+namespace SignInWithApple.Sample.iOS.ViewControllers
 {
     public partial class ResultViewController : UIViewController
     {
@@ -56,7 +57,9 @@ namespace SignInWithApple.Sample.iOS
             var storyboard = UIStoryboard.FromName("Main", null);
 
             if (!(storyboard.InstantiateViewController(nameof(LoginViewController)) is LoginViewController viewController))
+            {
                 return;
+            }
 
             viewController.ModalPresentationStyle = UIModalPresentationStyle.FormSheet;
             viewController.ModalInPresentation = true;

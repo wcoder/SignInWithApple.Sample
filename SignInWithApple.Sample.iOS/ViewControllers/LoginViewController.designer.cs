@@ -6,7 +6,7 @@
 //
 using Foundation;
 
-namespace SignInWithApple.Sample.iOS
+namespace SignInWithApple.Sample.iOS.ViewControllers
 {
     [Register("LoginViewController")]
     partial class LoginViewController
