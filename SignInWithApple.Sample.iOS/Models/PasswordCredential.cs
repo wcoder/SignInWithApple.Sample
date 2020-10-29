@@ -1,4 +1,4 @@
-namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
+namespace SignInWithApple.Sample.iOS.Models
 {
     public class PasswordCredential
     {

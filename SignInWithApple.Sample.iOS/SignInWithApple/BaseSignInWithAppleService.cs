@@ -1,23 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using AuthenticationServices;
 using Foundation;
 using UIKit;
 
-namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
+namespace SignInWithApple.Sample.iOS.SignInWithApple
 {
-    public class SignInWithAppleService : ISignInWithAppleService, IDisposable
+    /// <summary>
+    ///     The base class to integrate with Sign-In with Apple.
+    /// </summary>
+    public abstract class BaseSignInWithAppleService : IDisposable
     {
-        private readonly ISessionManager _sessionManager;
         private readonly ASAuthorizationAppleIdProvider _appleIdProvider;
         private readonly CustomDelegate _authControllerDelegate;
         private readonly CustomPresentationContextProvider _presentationProvider;
 
-        public SignInWithAppleService(
-            ISessionManager sessionManager,
-            Func<UIWindow> windowProvider)
+        protected BaseSignInWithAppleService(Func<UIWindow> windowProvider)
         {
-            _sessionManager = sessionManager;
             _appleIdProvider = new ASAuthorizationAppleIdProvider();
 
             _authControllerDelegate = new CustomDelegate();
@@ -35,18 +36,20 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
             _authControllerDelegate.CompletedWithError -= DidCompleteAuthWithError;
         }
 
-        public event EventHandler<AppleIdCredential> CompletedWithAppleId;
+        public abstract string CurrentUserIdentifier { get; }
 
-        public event EventHandler<PasswordCredential> CompletedWithPassword;
-
-        public string CurrentUserIdentifier => _sessionManager.CurrentUserIdentifier;
-
+        /// <summary>
+        ///     Handler the credential state for the given user.
+        /// </summary>
+        /// <param name="authorized">The Apple ID credential is valid handler.</param>
+        /// <param name="credentialRevoked">The Apple ID credential is revoked handler.</param>
+        /// <param name="credentialNotFound">No credential was found, so show the sign-in UI.</param>
         public void GetCredentialState(
             Action authorized = null,
             Action credentialRevoked = null,
             Action credentialNotFound = null)
         {
-            _appleIdProvider.GetCredentialState(_sessionManager.CurrentUserIdentifier, (credentialState, error) =>
+            _appleIdProvider.GetCredentialState(CurrentUserIdentifier, (credentialState, error) =>
             {
                 switch (credentialState)
                 {
@@ -63,14 +66,22 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
             });
         }
 
-        public void SignIn()
+        public void SignIn(
+            bool needEmail = true,
+            bool needFullName = true)
         {
-            var request = _appleIdProvider.CreateRequest();
-            request.RequestedScopes = new[]
+            var requestedScopes = new List<ASAuthorizationScope>();
+            if (needEmail)
             {
-                ASAuthorizationScope.Email,
-                ASAuthorizationScope.FullName
-            };
+                requestedScopes.Add(ASAuthorizationScope.Email);
+            }
+            if (needFullName)
+            {
+                requestedScopes.Add(ASAuthorizationScope.FullName);
+            }
+            
+            var request = _appleIdProvider.CreateRequest();
+            request.RequestedScopes = requestedScopes.ToArray();
 
             // Prepare request for Apple ID.
             ASAuthorizationRequest[] requests = {
@@ -85,12 +96,12 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
             };
             authorizationController.PerformRequests();
         }
+
+        public abstract void SignUp();
         
-        public void SignUp()
-        {
-            _sessionManager.DeleteUserIdentifier();
-        }
-        
+        /// <summary>
+        ///     Prompts the user if an existing iCloud Keychain credential or Apple ID credential is found.
+        /// </summary>
         public void PerformExistingAccountSetupFlows()
         {
             // Prepare requests for both Apple ID and password providers.
@@ -107,42 +118,51 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
             };
             authorizationController.PerformRequests();
         }
-
-        private void DidCompleteAuthWithAppleId(object sender, ASAuthorizationAppleIdCredential e)
-        {
-            // https://developer.apple.com/documentation/authenticationservices/asauthorizationappleidcredential
-            var credential = new AppleIdCredential
-            {
-                IdentityToken = e.IdentityToken?.ToString(),
-                AuthorizationCode = e.AuthorizationCode?.ToString(),
-                Email = e.Email,
-                FullName = e.FullName?.ToString(),
-                GivenName = e.FullName?.GivenName,
-                FamilyName = e.FullName?.FamilyName,
-                State = e.State,
-                User = e.User
-            };
-            
-            _sessionManager.CreateUserIdentifier(credential);
-            
-            CompletedWithAppleId?.Invoke(sender, credential);
-        }
         
+        /// <summary>
+        ///     Register New Account. Will be called once to save details.
+        /// </summary>
+        /// <param name="appleIdCredential">A credential that results from a successful Apple ID authentication.</param>
+        /// <returns></returns>
+        protected abstract Task RegisterNewAccount(ASAuthorizationAppleIdCredential appleIdCredential);
+
+        /// <summary>
+        ///     Sign-in with an existing account. Without additional user data (email, name).
+        /// </summary>
+        /// <param name="appleIdCredential">A credential that results from a successful Apple ID authentication.</param>
+        /// <returns></returns>
+        protected abstract Task SignInWithExistingAccount(ASAuthorizationAppleIdCredential appleIdCredential);
+        
+        /// <summary>
+        ///     Sign in using an existing iCloud Keychain credential.
+        /// </summary>
+        /// <param name="passwdCredential">A password credential.</param>
+        /// <returns></returns>
+        protected abstract Task SignInWithUserAndPassword(ASPasswordCredential passwdCredential);
+
+        protected abstract void HandleException(Exception exception);
+
+        private async void DidCompleteAuthWithAppleId(object sender, ASAuthorizationAppleIdCredential e)
+        {
+            // Apple will only provide you the requested details (Name, Email) on the first authentication.
+            if (string.IsNullOrEmpty(e.Email))
+            {
+                await SignInWithExistingAccount(e);
+            }
+            else
+            {
+                await RegisterNewAccount(e);
+            }
+        }
+
         private void DidCompleteAuthWithPassword(object sender, ASPasswordCredential e)
         {
-            // Sign in using an existing iCloud Keychain credential.
-            var credential = new PasswordCredential
-            {
-                User = e.User,
-                Password = e.Password
-            };
-
-            CompletedWithPassword?.Invoke(sender, credential);
+            SignInWithUserAndPassword(e);
         }
-        
-        protected virtual void DidCompleteAuthWithError(object sender, NSError error)
+
+        private void DidCompleteAuthWithError(object sender, NSError error)
         {
-            Console.WriteLine(error);
+            HandleException(new NSErrorException(error));
         }
 
         [SuppressMessage("ReSharper", "UnusedMember.Local")]
@@ -155,6 +175,7 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
             [Export("authorizationController:didCompleteWithAuthorization:")]
             public void DidComplete(ASAuthorizationController controller, ASAuthorization authorization)
             {
+                // Determine whether the user authenticated via Apple ID or a stored iCloud password.
                 if (authorization.GetCredential<ASAuthorizationAppleIdCredential>() is ASAuthorizationAppleIdCredential appleIdCredential)
                 {
                     CompletedWithAppleId?.Invoke(controller, appleIdCredential);

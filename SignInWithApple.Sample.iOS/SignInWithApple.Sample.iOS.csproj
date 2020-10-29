@@ -132,16 +132,15 @@
         <None Include="Entitlements.plist" />
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Keychain\KeychainException.cs" />
+        <Compile Include="Keychain\KeychainItem.cs" />
         <Compile Include="Main.cs" />
         <Compile Include="AppDelegate.cs" />
+        <Compile Include="Models\AppleIdCredential.cs" />
+        <Compile Include="Models\PasswordCredential.cs" />
+        <Compile Include="Services\CustomSignInWithAppleService.cs" />
         <Compile Include="Services\KeychainSessionManager.cs" />
-        <Compile Include="Services\Keychain\KeychainException.cs" />
-        <Compile Include="Services\Keychain\KeychainItem.cs" />
-        <Compile Include="Services\SignInWithApple\AppleIdCredential.cs" />
-        <Compile Include="Services\SignInWithApple\ISessionManager.cs" />
-        <Compile Include="Services\SignInWithApple\ISignInWithAppleService.cs" />
-        <Compile Include="Services\SignInWithApple\PasswordCredential.cs" />
-        <Compile Include="Services\SignInWithApple\SignInWithAppleService.cs" />
+        <Compile Include="SignInWithApple\BaseSignInWithAppleService.cs" />
         <Compile Include="ViewControllers\LoginViewController.cs" />
         <Compile Include="ViewControllers\LoginViewController.designer.cs">
           <DependentUpon>LoginViewController.cs</DependentUpon>

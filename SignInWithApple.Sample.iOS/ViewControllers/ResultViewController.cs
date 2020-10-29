@@ -1,35 +1,12 @@
 ﻿using System;
 using Foundation;
+using SignInWithApple.Sample.iOS.Models;
 using UIKit;
 
 namespace SignInWithApple.Sample.iOS.ViewControllers
 {
     public partial class ResultViewController : UIViewController
     {
-        public string UserIdentifierText
-        {
-            get => userIdentifierLabel.Text;
-            set => userIdentifierLabel.Text = value;
-        }
-
-        public string GivenNameText
-        {
-            get => givenNameLabel.Text;
-            set => givenNameLabel.Text = value;
-        }
-
-        public string FamilyNameText
-        {
-            get => familyNameLabel.Text;
-            set => familyNameLabel.Text = value;
-        }
-
-        public string EmailText
-        {
-            get => emailLabel.Text;
-            set => emailLabel.Text = value;
-        }
-
         public ResultViewController(IntPtr handle) : base(handle)
         {
         }
@@ -39,6 +16,14 @@ namespace SignInWithApple.Sample.iOS.ViewControllers
             base.ViewDidLoad();
 
             userIdentifierLabel.Text = AppDelegate.AuthService.CurrentUserIdentifier;
+        }
+        
+        public void SetInfo(AppleIdCredential credential)
+        {
+            userIdentifierLabel.Text = credential.User;
+            givenNameLabel.Text = credential.GivenName ?? "";
+            familyNameLabel.Text = credential.FamilyName ?? "";
+            emailLabel.Text = credential.Email ?? "";
         }
 
         partial void SignOutButtonPressed(NSObject sender)

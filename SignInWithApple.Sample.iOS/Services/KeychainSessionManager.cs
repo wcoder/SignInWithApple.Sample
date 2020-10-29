@@ -1,10 +1,10 @@
 using System;
+using SignInWithApple.Sample.iOS.Models;
 using SignInWithApple.Sample.iOS.Services.Keychain;
-using SignInWithApple.Sample.iOS.Services.SignInWithApple;
 
 namespace SignInWithApple.Sample.iOS.Services
 {
-    public class KeychainSessionManager : ISessionManager
+    public class KeychainSessionManager
     {
         private readonly string _service;
 

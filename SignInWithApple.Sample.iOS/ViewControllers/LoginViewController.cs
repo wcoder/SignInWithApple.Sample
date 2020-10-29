@@ -1,7 +1,6 @@
 ﻿using System;
 using AuthenticationServices;
-using SignInWithApple.Sample.iOS.Services;
-using SignInWithApple.Sample.iOS.Services.SignInWithApple;
+using SignInWithApple.Sample.iOS.Models;
 using UIKit;
 
 namespace SignInWithApple.Sample.iOS.ViewControllers
@@ -63,10 +62,7 @@ namespace SignInWithApple.Sample.iOS.ViewControllers
 
             InvokeOnMainThread(() =>
             {
-                viewController.UserIdentifierText = credential.User;
-                viewController.GivenNameText = credential.GivenName ?? "";
-                viewController.FamilyNameText = credential.FamilyName ?? "";
-                viewController.EmailText = credential.Email ?? "";
+                viewController.SetInfo(credential);
 
                 DismissViewController(true, null);
             });
