@@ -4,7 +4,7 @@ using SignInWithApple.Sample.iOS.Services.Keychain;
 
 namespace SignInWithApple.Sample.iOS.Services
 {
-    public class KeychainSessionManager
+    public class SampleKeychainSessionManager
     {
         private readonly string _service;
 
@@ -12,7 +12,7 @@ namespace SignInWithApple.Sample.iOS.Services
         ///     Initializes new instance.
         /// </summary>
         /// <param name="service">Service associated with an InternetPassword.</param>
-        public KeychainSessionManager(string service)
+        public SampleKeychainSessionManager(string service)
         {
             _service = service;
         }

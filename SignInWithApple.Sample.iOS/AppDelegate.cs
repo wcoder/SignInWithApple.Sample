@@ -10,11 +10,11 @@ namespace SignInWithApple.Sample.iOS
     {
         public override UIWindow Window { get; set; }
         
-        internal static CustomBaseSignInWithAppleService AuthService { get; private set; }
+        internal static SampleSignInWithAppleService AuthService { get; private set; }
 
         public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
         {
-            AuthService = new CustomBaseSignInWithAppleService(() => Window);
+            AuthService = new SampleSignInWithAppleService(() => Window);
             AuthService.GetCredentialState(
                 credentialNotFound: ShowLoginPage);
 
