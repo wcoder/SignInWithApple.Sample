@@ -1,10 +1,8 @@
 # Xamarin.iOS - Sign In with Apple Flow
 
-Provide a fast, secure, and privacy-friendly way for users to set up an account and start using your services (iOS13)
-
 ## Adding the Sign In with Apple Flow to Your App
 
-This is a Xamarin port of Apple's [Adding the Sign In with Apple Flow to Your App][1] sample.
+This is a reworked Xamarin port of Apple's [Adding the Sign In with Apple Flow to Your App][1] sample.
 
 Provide a fast, secure, and privacy-friendly way for users to set up an account and start using your services.
 
@@ -36,7 +34,9 @@ This sample runnable on iPhoneSimulator/iPadSimulator iPhone/iPad
 
 ## License
 
-Xamarin port changes are released under the MIT license.
+Yauheni Pakala changes are released under the MIT license.
+
+[Xamarin port][6] changes are released under the MIT license.
 
 The original sample is released under the following [license][4].
 
@@ -45,3 +45,4 @@ The original sample is released under the following [license][4].
 [3]: https://developer.apple.com/videos/play/wwdc19/706/
 [4]: ./LICENSE/LICENSE.txt
 [5]: https://developer.apple.com/account/resources/identifiers/list
+[6]: https://github.com/xamarin/ios-samples/tree/main/ios13/AddingTheSignInWithAppleFlowToYourApp
