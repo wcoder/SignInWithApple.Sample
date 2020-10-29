@@ -1,14 +1,12 @@
 ﻿using System;
 using AuthenticationServices;
-using Foundation;
-using SignInWithApple.Sample.iOS.Utils;
+using SignInWithApple.Sample.iOS.Services;
+using SignInWithApple.Sample.iOS.Services.SignInWithApple;
 using UIKit;
 
 namespace SignInWithApple.Sample.iOS.ViewControllers
 {
-    public partial class LoginViewController : UIViewController,
-        IASAuthorizationControllerDelegate,
-        IASAuthorizationControllerPresentationContextProviding
+    public partial class LoginViewController : UIViewController
     {
         public LoginViewController(IntPtr handle) : base(handle)
         {
@@ -18,126 +16,77 @@ namespace SignInWithApple.Sample.iOS.ViewControllers
         {
             base.ViewDidLoad();
 
-            InitProviderLoginView();
+            AddSignInWithAppleButton();
         }
 
         public override void ViewDidAppear(bool animated)
         {
             base.ViewDidAppear(animated);
 
-            PerformExistingAccountSetupFlows();
+            AppDelegate.AuthService.CompletedWithAppleId += DidCompleteAuthWithAppleId;
+            AppDelegate.AuthService.CompletedWithPassword += DidCompleteAuthWithPassword;
+            
+            AppDelegate.AuthService.PerformExistingAccountSetupFlows();
         }
 
-        private void InitProviderLoginView()
+        public override void ViewDidDisappear(bool animated)
+        {
+            base.ViewDidDisappear(animated);
+            
+            AppDelegate.AuthService.CompletedWithAppleId -= DidCompleteAuthWithAppleId;
+            AppDelegate.AuthService.CompletedWithPassword -= DidCompleteAuthWithPassword;
+        }
+
+        private void AddSignInWithAppleButton()
         {
             var authorizationButton = new ASAuthorizationAppleIdButton(
                 ASAuthorizationAppleIdButtonType.Default,
                 ASAuthorizationAppleIdButtonStyle.White);
-            authorizationButton.TouchUpInside += HandleAuthorizationAppleIDButtonPress;
+            authorizationButton.CornerRadius = 20;
+            authorizationButton.TouchUpInside += OnTouchUpInsideAppleIdButton;
+
             loginProviderStackView.AddArrangedSubview(authorizationButton);
         }
 
-        // Prompts the user if an existing iCloud Keychain credential or Apple ID credential is found.
-        private void PerformExistingAccountSetupFlows()
+        private void OnTouchUpInsideAppleIdButton(object sender, EventArgs e)
         {
-            // Prepare requests for both Apple ID and password providers.
-            ASAuthorizationRequest[] requests = {
-                new ASAuthorizationAppleIdProvider().CreateRequest(),
-                new ASAuthorizationPasswordProvider().CreateRequest()
-            };
-
-            // Create an authorization controller with the given requests.
-            var authorizationController = new ASAuthorizationController(requests);
-            authorizationController.Delegate = this;
-            authorizationController.PresentationContextProvider = this;
-            authorizationController.PerformRequests();
+            AppDelegate.AuthService.SignIn();
         }
 
-        private void HandleAuthorizationAppleIDButtonPress(object sender, EventArgs e)
+        private void DidCompleteAuthWithAppleId(object sender, AppleIdCredential credential)
         {
-            var appleIdProvider = new ASAuthorizationAppleIdProvider();
-            var request = appleIdProvider.CreateRequest();
-            request.RequestedScopes = new[]
+            // For the purpose of this demo app, show the Apple ID credential information in the ResultViewController.
+            if (!(PresentingViewController is ResultViewController viewController))
             {
-                ASAuthorizationScope.Email,
-                ASAuthorizationScope.FullName
-            };
-
-            var authorizationController = new ASAuthorizationController(new[] { request });
-            authorizationController.Delegate = this;
-            authorizationController.PresentationContextProvider = this;
-            authorizationController.PerformRequests();
-        }
-
-        #region IASAuthorizationController Delegate
-
-        [Export("authorizationController:didCompleteWithAuthorization:")]
-        public void DidComplete(ASAuthorizationController controller, ASAuthorization authorization)
-        {
-            if (authorization.GetCredential<ASAuthorizationAppleIdCredential>() is ASAuthorizationAppleIdCredential appleIdCredential)
-            {
-                var userIdentifier = appleIdCredential.User;
-                var fullName = appleIdCredential.FullName;
-                var email = appleIdCredential.Email;
-
-                // Create an account in your system.
-                // For the purpose of this demo app, store the userIdentifier in the keychain.
-                try
-                {
-                    new KeychainItem("com.xamarin.AddingTheSignInWithAppleFlowToYourApp", "userIdentifier").SaveItem(userIdentifier);
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("Unable to save userIdentifier to keychain.");
-                }
-
-                // For the purpose of this demo app, show the Apple ID credential information in the ResultViewController.
-                if (!(PresentingViewController is ResultViewController viewController))
-                {
-                    return;
-                }
-
-                InvokeOnMainThread(() =>
-                {
-                    viewController.UserIdentifierText = userIdentifier;
-                    viewController.GivenNameText = fullName?.GivenName ?? "";
-                    viewController.FamilyNameText = fullName?.FamilyName ?? "";
-                    viewController.EmailText = email ?? "";
-
-                    DismissViewController(true, null);
-                });
+                return;
             }
-            else if (authorization.GetCredential<ASPasswordCredential>() is ASPasswordCredential passwordCredential)
+
+            InvokeOnMainThread(() =>
             {
-                // Sign in using an existing iCloud Keychain credential.
-                var username = passwordCredential.User;
-                var password = passwordCredential.Password;
+                viewController.UserIdentifierText = credential.User;
+                viewController.GivenNameText = credential.GivenName ?? "";
+                viewController.FamilyNameText = credential.FamilyName ?? "";
+                viewController.EmailText = credential.Email ?? "";
 
-                // For the purpose of this demo app, show the password credential as an alert.
-                InvokeOnMainThread(() =>
-                {
-                    var message = $"The app has received your selected credential from the keychain. \n\n Username: {username}\n Password: {password}";
-                    var alertController = UIAlertController.Create("Keychain Credential Received", message, UIAlertControllerStyle.Alert);
-                    alertController.AddAction(UIAlertAction.Create("Dismiss", UIAlertActionStyle.Cancel, null));
-
-                    PresentViewController(alertController, true, null);
-                });
-            }
+                DismissViewController(true, null);
+            });
         }
 
-        [Export("authorizationController:didCompleteWithError:")]
-        public void DidComplete(ASAuthorizationController controller, NSError error)
+        private void DidCompleteAuthWithPassword(object sender, PasswordCredential passwordCredential)
         {
-            Console.WriteLine(error);
+            var username = passwordCredential.User;
+            var password = passwordCredential.Password;
+
+            // For the purpose of this demo app, show the password credential as an alert.
+            InvokeOnMainThread(() =>
+            {
+                var message = $"The app has received your selected credential from the keychain. \n\n Username: {username}\n Password: {password}";
+                var alertController = UIAlertController.Create("Keychain Credential Received", message, UIAlertControllerStyle.Alert);
+                alertController.AddAction(UIAlertAction.Create("Dismiss", UIAlertActionStyle.Cancel, null));
+
+                PresentViewController(alertController, true, null);
+            });
         }
-
-        #endregion
-
-        #region IASAuthorizationControllerPresentation Context Providing
-
-        public UIWindow GetPresentationAnchor(ASAuthorizationController controller) => View.Window;
-
-        #endregion
     }
 }
 

@@ -1,6 +1,6 @@
-﻿using AuthenticationServices;
-using Foundation;
-using SignInWithApple.Sample.iOS.Utils;
+﻿using Foundation;
+using SignInWithApple.Sample.iOS.Services;
+using SignInWithApple.Sample.iOS.Services.SignInWithApple;
 using SignInWithApple.Sample.iOS.ViewControllers;
 using UIKit;
 
@@ -10,39 +10,22 @@ namespace SignInWithApple.Sample.iOS
     public class AppDelegate : UIApplicationDelegate
     {
         public override UIWindow Window { get; set; }
+        
+        internal static ISignInWithAppleService AuthService { get; private set; }
 
         public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
         {
-            InitAuthorization();
+            // For the purpose of this demo app, store the userIdentifier in the keychain.
+            var sessionManager = new KeychainSessionManager("com.xamarin.AddingTheSignInWithAppleFlowToYourApp");
+
+            AuthService = new SignInWithAppleService(sessionManager, () => Window);
+            AuthService.GetCredentialState(
+                credentialNotFound: ShowLoginPage);
 
             return true;
         }
 
-        private void InitAuthorization()
-        {
-            var appleIdProvider = new ASAuthorizationAppleIdProvider();
-            var userId = KeychainItem.CurrentUserIdentifier;
-
-            appleIdProvider.GetCredentialState(userId, (credentialState, error) =>
-            {
-                switch (credentialState)
-                {
-                    case ASAuthorizationAppleIdProviderCredentialState.Authorized:
-                        // The Apple ID credential is valid.
-                        break;
-                    case ASAuthorizationAppleIdProviderCredentialState.Revoked:
-                        // The Apple ID credential is revoked.
-                        break;
-                    case ASAuthorizationAppleIdProviderCredentialState.NotFound:
-                        // No credential was found, so show the sign-in UI.
-
-                        GoToLogin();
-                        break;
-                }
-            });
-        }
-
-        private void GoToLogin()
+        private void ShowLoginPage()
         {
             InvokeOnMainThread(() =>
             {

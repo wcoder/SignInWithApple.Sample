@@ -1,7 +1,7 @@
 ﻿using System;
 using Security;
 
-namespace SignInWithApple.Sample.iOS.Utils
+namespace SignInWithApple.Sample.iOS.Services.Keychain
 {
     public class KeychainException : Exception
     {

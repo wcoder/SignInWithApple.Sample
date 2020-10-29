@@ -1,10 +1,9 @@
-﻿using System;
-using Foundation;
+﻿using Foundation;
 using Security;
 
-namespace SignInWithApple.Sample.iOS.Utils
+namespace SignInWithApple.Sample.iOS.Services.Keychain
 {
-    public class KeychainItem
+    internal class KeychainItem
     {
         #region Properties
 
@@ -105,33 +104,6 @@ namespace SignInWithApple.Sample.iOS.Utils
                 Account = account,
                 AccessGroup = accessGroup
             };
-        }
-
-        public static string CurrentUserIdentifier
-        {
-            get
-            {
-                try
-                {
-                    return new KeychainItem("com.xamarin.AddingTheSignInWithAppleFlowToYourApp", "userIdentifier").ReadItem();
-                }
-                catch (Exception)
-                {
-                    return "";
-                }
-            }
-        }
-
-        public static void DeleteUserIdentifierFromKeychain()
-        {
-            try
-            {
-                new KeychainItem("com.xamarin.AddingTheSignInWithAppleFlowToYourApp", "userIdentifier").DeleteItem();
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Unable to delete userIdentifier from keychain");
-            }
         }
 
         #endregion

@@ -120,8 +120,8 @@
     </ItemGroup>
     <ItemGroup>
         <Folder Include="Resources\" />
-        <Folder Include="Utils\" />
         <Folder Include="ViewControllers\" />
+        <Folder Include="Services\" />
     </ItemGroup>
     <ItemGroup>
         <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
@@ -134,8 +134,14 @@
     <ItemGroup>
         <Compile Include="Main.cs" />
         <Compile Include="AppDelegate.cs" />
-        <Compile Include="Utils\KeychainException.cs" />
-        <Compile Include="Utils\KeychainItem.cs" />
+        <Compile Include="Services\KeychainSessionManager.cs" />
+        <Compile Include="Services\Keychain\KeychainException.cs" />
+        <Compile Include="Services\Keychain\KeychainItem.cs" />
+        <Compile Include="Services\SignInWithApple\AppleIdCredential.cs" />
+        <Compile Include="Services\SignInWithApple\ISessionManager.cs" />
+        <Compile Include="Services\SignInWithApple\ISignInWithAppleService.cs" />
+        <Compile Include="Services\SignInWithApple\PasswordCredential.cs" />
+        <Compile Include="Services\SignInWithApple\SignInWithAppleService.cs" />
         <Compile Include="ViewControllers\LoginViewController.cs" />
         <Compile Include="ViewControllers\LoginViewController.designer.cs">
           <DependentUpon>LoginViewController.cs</DependentUpon>

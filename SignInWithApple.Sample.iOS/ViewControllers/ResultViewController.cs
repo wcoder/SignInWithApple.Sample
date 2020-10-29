@@ -1,6 +1,5 @@
 ﻿using System;
 using Foundation;
-using SignInWithApple.Sample.iOS.Utils;
 using UIKit;
 
 namespace SignInWithApple.Sample.iOS.ViewControllers
@@ -39,13 +38,12 @@ namespace SignInWithApple.Sample.iOS.ViewControllers
         {
             base.ViewDidLoad();
 
-            userIdentifierLabel.Text = KeychainItem.CurrentUserIdentifier;
+            userIdentifierLabel.Text = AppDelegate.AuthService.CurrentUserIdentifier;
         }
 
         partial void SignOutButtonPressed(NSObject sender)
         {
-            // For the purpose of this demo app, delete the user identifier that was previously stored in the keychain.
-            KeychainItem.DeleteUserIdentifierFromKeychain();
+            AppDelegate.AuthService.SignUp();
 
             // Clear the user interface.
             userIdentifierLabel.Text = "";
