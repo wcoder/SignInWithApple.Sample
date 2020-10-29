@@ -6,7 +6,7 @@ using UIKit;
 
 namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
 {
-    public class SignInWithAppleService : ISignInWithAppleService
+    public class SignInWithAppleService : ISignInWithAppleService, IDisposable
     {
         private readonly ISessionManager _sessionManager;
         private readonly ASAuthorizationAppleIdProvider _appleIdProvider;
@@ -26,6 +26,13 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
             _authControllerDelegate.CompletedWithError += DidCompleteAuthWithError;
             
             _presentationProvider = new CustomPresentationContextProvider(windowProvider);
+        }
+
+        public void Dispose()
+        {
+            _authControllerDelegate.CompletedWithAppleId -= DidCompleteAuthWithAppleId;
+            _authControllerDelegate.CompletedWithPassword -= DidCompleteAuthWithPassword;
+            _authControllerDelegate.CompletedWithError -= DidCompleteAuthWithError;
         }
 
         public event EventHandler<AppleIdCredential> CompletedWithAppleId;
