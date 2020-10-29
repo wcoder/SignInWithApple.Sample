@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using AuthenticationServices;
 using Foundation;
 using UIKit;
@@ -9,8 +10,8 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
     {
         private readonly ISessionManager _sessionManager;
         private readonly ASAuthorizationAppleIdProvider _appleIdProvider;
-        private readonly SignInWithAppleDelegates _authControllerDelegate;
-        private readonly PresentationContextProvider _presentationProvider;
+        private readonly CustomDelegate _authControllerDelegate;
+        private readonly CustomPresentationContextProvider _presentationProvider;
 
         public SignInWithAppleService(
             ISessionManager sessionManager,
@@ -19,12 +20,12 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
             _sessionManager = sessionManager;
             _appleIdProvider = new ASAuthorizationAppleIdProvider();
 
-            _authControllerDelegate = new SignInWithAppleDelegates();
+            _authControllerDelegate = new CustomDelegate();
             _authControllerDelegate.CompletedWithAppleId += DidCompleteAuthWithAppleId;
             _authControllerDelegate.CompletedWithPassword += DidCompleteAuthWithPassword;
             _authControllerDelegate.CompletedWithError += DidCompleteAuthWithError;
             
-            _presentationProvider = new PresentationContextProvider(windowProvider);
+            _presentationProvider = new CustomPresentationContextProvider(windowProvider);
         }
 
         public event EventHandler<AppleIdCredential> CompletedWithAppleId;
@@ -137,7 +138,8 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
             Console.WriteLine(error);
         }
 
-        private class SignInWithAppleDelegates : NSObject, IASAuthorizationControllerDelegate
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
+        private class CustomDelegate : NSObject, IASAuthorizationControllerDelegate
         {
             public event EventHandler<ASAuthorizationAppleIdCredential> CompletedWithAppleId;
             public event EventHandler<ASPasswordCredential> CompletedWithPassword;
@@ -163,23 +165,20 @@ namespace SignInWithApple.Sample.iOS.Services.SignInWithApple
             }
         }
 
-        private class PresentationContextProvider : NSObject, IASAuthorizationControllerPresentationContextProviding
+        private class CustomPresentationContextProvider : NSObject, IASAuthorizationControllerPresentationContextProviding
         {
             private readonly WeakReference<Func<UIWindow>> _windowProviderRef;
 
-            public PresentationContextProvider(Func<UIWindow> func)
+            public CustomPresentationContextProvider(Func<UIWindow> func)
             {
                 _windowProviderRef = new WeakReference<Func<UIWindow>>(func);
             }
 
             public UIWindow GetPresentationAnchor(ASAuthorizationController controller)
             {
-                if (_windowProviderRef.TryGetTarget(out Func<UIWindow> windowProvider))
-                {
-                    return windowProvider.Invoke();
-                }
-
-                return UIApplication.SharedApplication.KeyWindow;
+                return _windowProviderRef.TryGetTarget(out var windowProvider)
+                    ? windowProvider.Invoke()
+                    : UIApplication.SharedApplication.KeyWindow;
             }
         }
     }
