@@ -50,9 +50,9 @@ namespace SignInWithApple.Sample.iOS.SignInWithApple
         /// <param name="credentialRevoked">The Apple ID credential is revoked handler.</param>
         /// <param name="credentialNotFound">No credential was found, so show the sign-in UI.</param>
         public void GetCredentialState(
-            Action authorized = null,
-            Action credentialRevoked = null,
-            Action credentialNotFound = null)
+            Action? authorized = null,
+            Action? credentialRevoked = null,
+            Action? credentialNotFound = null)
         {
             _appleIdProvider.GetCredentialState(CurrentUserIdentifier, (credentialState, error) =>
             {
@@ -187,19 +187,19 @@ namespace SignInWithApple.Sample.iOS.SignInWithApple
         [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private class CustomDelegate : NSObject, IASAuthorizationControllerDelegate
         {
-            public event EventHandler<ASAuthorizationAppleIdCredential> CompletedWithAppleId;
-            public event EventHandler<ASPasswordCredential> CompletedWithPassword;
-            public event EventHandler<NSError> CompletedWithError;
+            public event EventHandler<ASAuthorizationAppleIdCredential>? CompletedWithAppleId;
+            public event EventHandler<ASPasswordCredential>? CompletedWithPassword;
+            public event EventHandler<NSError>? CompletedWithError;
 
             [Export("authorizationController:didCompleteWithAuthorization:")]
             public void DidComplete(ASAuthorizationController controller, ASAuthorization authorization)
             {
                 // Determine whether the user authenticated via Apple ID or a stored iCloud password.
-                if (authorization.GetCredential<ASAuthorizationAppleIdCredential>() is ASAuthorizationAppleIdCredential appleIdCredential)
+                if (authorization.GetCredential<ASAuthorizationAppleIdCredential>() is { } appleIdCredential)
                 {
                     CompletedWithAppleId?.Invoke(controller, appleIdCredential);
                 }
-                else if (authorization.GetCredential<ASPasswordCredential>() is ASPasswordCredential passwordCredential)
+                else if (authorization.GetCredential<ASPasswordCredential>() is { } passwordCredential)
                 {
                     CompletedWithPassword?.Invoke(controller, passwordCredential);
                 }
