@@ -17,6 +17,8 @@ namespace SignInWithApple.Sample.iOS.SignInWithApple
         private readonly CustomDelegate _authControllerDelegate;
         private readonly CustomPresentationContextProvider _presentationProvider;
 
+        private IDisposable? _credentialRevokedObserver;
+
         protected BaseSignInWithAppleService(Func<UIWindow> windowProvider)
         {
             _appleIdProvider = new ASAuthorizationAppleIdProvider();
@@ -34,6 +36,9 @@ namespace SignInWithApple.Sample.iOS.SignInWithApple
             _authControllerDelegate.CompletedWithAppleId -= DidCompleteAuthWithAppleId;
             _authControllerDelegate.CompletedWithPassword -= DidCompleteAuthWithPassword;
             _authControllerDelegate.CompletedWithError -= DidCompleteAuthWithError;
+            
+            _credentialRevokedObserver?.Dispose();
+            _credentialRevokedObserver = null;
         }
 
         public abstract string CurrentUserIdentifier { get; }
@@ -117,6 +122,20 @@ namespace SignInWithApple.Sample.iOS.SignInWithApple
                 PresentationContextProvider = _presentationProvider
             };
             authorizationController.PerformRequests();
+        }
+
+        /// <summary>
+        ///     Optional method. 
+        ///     Add observer when the user revokes the sign-in in Settings app
+        /// </summary>
+        /// <param name="appleIdStateRevoked">Log out user, change UI etc</param>
+        public void AddCredentialRevokedObserver(Action appleIdStateRevoked)
+        {
+            _credentialRevokedObserver = ASAuthorizationAppleIdProvider.Notifications.ObserveCredentialRevoked(
+                (s, args) =>
+                {
+                    appleIdStateRevoked.Invoke();
+                });
         }
         
         /// <summary>

@@ -15,6 +15,12 @@ namespace SignInWithApple.Sample.iOS
         public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
         {
             AuthService = new SampleSignInWithAppleService(() => Window);
+            AuthService.AddCredentialRevokedObserver(
+                appleIdStateRevoked:() =>
+                {
+                    AuthService.SignUp();
+                    ShowLoginPage();
+                });
             AuthService.GetCredentialState(
                 credentialNotFound: ShowLoginPage);
 
