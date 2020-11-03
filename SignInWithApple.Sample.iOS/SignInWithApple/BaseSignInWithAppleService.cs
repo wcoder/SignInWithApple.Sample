@@ -59,13 +59,18 @@ namespace SignInWithApple.Sample.iOS.SignInWithApple
                 switch (credentialState)
                 {
                     case ASAuthorizationAppleIdProviderCredentialState.Authorized:
+                        // user remain logged in, proceed to another view
                         authorized?.Invoke();
                         break;
                     case ASAuthorizationAppleIdProviderCredentialState.Revoked:
+                        // user logged in before but revoked
                         credentialRevoked?.Invoke();
                         break;
                     case ASAuthorizationAppleIdProviderCredentialState.NotFound:
+                        // user haven't log in before
                         credentialNotFound?.Invoke();
+                        break;
+                    case ASAuthorizationAppleIdProviderCredentialState.Transferred:
                         break;
                 }
             });
@@ -181,6 +186,33 @@ namespace SignInWithApple.Sample.iOS.SignInWithApple
 
         private void DidCompleteAuthWithError(object sender, NSError error)
         {
+            var er = (ASAuthorizationError)(int)error.Code;
+            switch (er)
+            {
+                case ASAuthorizationError.Canceled:
+                    // user press "cancel" during the login prompt
+                    Console.WriteLine("Canceled");
+                    break;
+                case ASAuthorizationError.Unknown:
+                    // user didn't login their Apple ID on the device
+                    Console.WriteLine("Unknown");
+                    break;
+                case ASAuthorizationError.InvalidResponse:
+                    // invalid response received from the login
+                    Console.WriteLine("InvalidResponse");
+                    break;
+                case ASAuthorizationError.NotHandled:
+                    // authorization request not handled, maybe internet failure during login
+                    Console.WriteLine("NotHandled");
+                    break;
+                case ASAuthorizationError.Failed:
+                    // authorization failed
+                    Console.WriteLine("Failed");
+                    break;
+                default:
+                    Console.WriteLine("Default");
+                    break;
+            }
             HandleException(new NSErrorException(error));
         }
 
