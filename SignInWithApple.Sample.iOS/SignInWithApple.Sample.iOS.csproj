@@ -143,6 +143,7 @@
         <Compile Include="Services\SampleSignInWithAppleService.cs" />
         <Compile Include="Services\SampleKeychainSessionManager.cs" />
         <Compile Include="SignInWithApple\BaseSignInWithAppleService.cs" />
+        <Compile Include="SignInWithApple\CustomWebViewSignInWithAppleService.cs" />
         <Compile Include="SignInWithApple\SampleWebSignInWithAppleService.cs" />
         <Compile Include="ViewControllers\LoginViewController.cs" />
         <Compile Include="ViewControllers\LoginViewController.designer.cs">
