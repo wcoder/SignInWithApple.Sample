@@ -1,6 +1,6 @@
 using System;
+using SignInWithApple.Sample.iOS.Keychain;
 using SignInWithApple.Sample.iOS.Models;
-using SignInWithApple.Sample.iOS.Services.Keychain;
 
 namespace SignInWithApple.Sample.iOS.Services
 {

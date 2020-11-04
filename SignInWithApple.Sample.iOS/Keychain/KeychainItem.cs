@@ -1,7 +1,7 @@
 ﻿using Foundation;
 using Security;
 
-namespace SignInWithApple.Sample.iOS.Services.Keychain
+namespace SignInWithApple.Sample.iOS.Keychain
 {
     internal class KeychainItem
     {
