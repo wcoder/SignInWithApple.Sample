@@ -26,6 +26,7 @@ Building this sample requires Xcode 11.0 and iOS 13.0 SDK
 
 - [Original sample page.][1]
 - [Sign In with Apple Entitlement.][2]
+- [Awesome sample by Redth][7]
 - This sample code project is associated with WWDC 2019 session 706: [Introducing Sign In with Apple.][3]
 
 ## Target
@@ -46,3 +47,4 @@ The original sample is released under the following [license][4].
 [4]: ./LICENSE/LICENSE.txt
 [5]: https://developer.apple.com/account/resources/identifiers/list
 [6]: https://github.com/xamarin/ios-samples/tree/main/ios13/AddingTheSignInWithAppleFlowToYourApp
+[7]: https://github.com/Redth/Xamarin.AppleSignIn.Sample
